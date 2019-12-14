@@ -33,9 +33,11 @@
 
     process {
         foreach ($moduleMass in $Mass) {
+            $Fuel = [Math]::Floor(($moduleMass / 3)) - 2
+
             [PSCustomObject]@{
                 Mass = $moduleMass
-                Fuel = [Math]::Floor(($moduleMass / 3)) - 2
+                Fuel = if ($Fuel -lt 0) { 0 } else { $fuel }
             }
         }
     }

@@ -8,6 +8,7 @@ Describe "01_part01" {
         @{Mass = 14; Result = 2}
         @{Mass = 1969; Result = 654}
         @{Mass = 100756; Result = 33583}
+        @{Mass = 2; Result = 0}
     ) -Test {
         param (
             $Mass,
