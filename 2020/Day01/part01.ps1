@@ -1,5 +1,11 @@
-#[int[]]$Sample = 1721, 979, 366, 299, 675, 1456
-[int[]]$Sample = Get-Content -Path .\day01_part01.txt
+[bool]$test = $false
+
+[int[]]$Sample = if ($test) {
+    1721, 979, 366, 299, 675, 1456
+}
+else {
+    Get-Content -Path "$PSScriptRoot\day01_part01.txt"
+}
 
 $list = [System.Collections.Generic.List[int]]::new()
 $list.AddRange($Sample)
