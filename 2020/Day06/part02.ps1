@@ -1,4 +1,4 @@
-function Get-AOCGroupAnswers {
+function Get-AOCGroupAnswersProper {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
@@ -6,7 +6,7 @@ function Get-AOCGroupAnswers {
     )
     
     begin {
-        
+
     }
     
     process {
@@ -16,19 +16,19 @@ function Get-AOCGroupAnswers {
 
             $individuals = $group -split '\r?\n' | Where-Object { -not [String]::IsNullOrWhitespace($PSItem) }
 
-            $choice = foreach ($individual in $individuals) {
-                [PSCustomObject]@{
-                    Individual = ++$person
-                    choices = $individual.ToCharArray()
-                }
-            }
+            $allYes = $individuals.ToCharArray() |
+                Group-Object |
+                Where-Object Count -eq $individuals.Count |
+                Measure-Object
+
+            Write-Verbose "$($allYes.Count) for $($individuals.count)"
 
             [PSCustomObject]@{
                 Counter = ++$index
                 GroupLine = $group -replace '\r?\n', ' '
-                Individuals = $individuals
-                Choices = $individuals.ToCharArray()
-                AllYes = ($choice.choices | Select-Object -Unique).Count
+                Individuals = $individuals -join ', '
+                Choices = $individuals.ToCharArray() -join ', '
+                AllYes = $allYes.Count
             }
         }
     }
