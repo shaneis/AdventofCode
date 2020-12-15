@@ -27,11 +27,25 @@ foreach ($Instruction in $InputContent) {
 
     $ValueDecimal = [Convert]::ToString($Value, 2).ToCharArray()
     
-    
-    for ($i = - 1; $i -ge (0 - $ValueDecimal.Count); $i--) {
-        Write-PSFMessage -Level Host -Message "Index: $i - Comparing $($ValueDecimal[$i]) against $($Mask[$i])"
-        
+    $char_string = [Text.StringBuilder]::new()
+    for ($i = -1; $i -ge (0 - $Mask.Length); $i--) {
+        Write-PSFMessage -Level Verbose -Message "Index: $i - Comparing $($ValueDecimal[$i]) against $($Mask[$i])"
+        $char = switch ($Mask[$i]) {
+            '0' { '0' }
+            '1' { '1' }
+            'X' { if ($null -ne $ValueDecimal[$i]) { $ValueDecimal[$i] } else { '0' }}
+        }
+        Write-PSFMessage -Level Verbose -Message "Adding $char to $($char_string.ToString())"
+        $char_string.Insert(0, $char) | Out-Null
     }
+    <#[PSCustomObject]@{
+        InputValue = -join $ValueDecimal
+        Mask = $Mask
+        OutputValue = $char_string.ToString()
+        ConvertedDecimal = [Convert]::ToInt32($char_String, 2)
+        Location = $Location.Local
+    }#>
+    $Program[$Location.Local] = [Convert]::ToInt64($char_string, 2)
 }
 
-#$Program
+$Program.GetEnumerator() | Measure-Object -Sum -Property Value
