@@ -24,7 +24,6 @@ $TargetNumbers = foreach ($r in $Rules) {
     }
 
 }
-Write-Verbose -Message "$($TargetNumbers | Out-String)"
 #endregion
 
 #region OurTicket
@@ -32,35 +31,38 @@ Write-Verbose -Message "$($TargetNumbers | Out-String)"
 #endregion
 
 #region OtherTickets
-$Tickets = $Content[-1] -split '\r?\n'
-
 $Seen = [Collections.Generic.HashSet[int]]::new()
 
-foreach ($ticket in $Tickets) {
-
-    $thisTicket = ($Tickets -split ',').Where({ $_ -match '\d' })
+foreach ($ticket in ($Content[-1] -split '\r?\n')) {
+    $Checked = [Collections.Generic.HashSet[int]]::new()
+    $thisTicket = ($ticket -split ',').Where({ $_ -match '\d' })
 
     $thisTicket.ForEach({ 
         [int]$currentNumber = $_
 
         foreach ($target in $TargetNumbers) {
-            if ($currentNumber -ge $target.First -and $currentNumber -le $target.Last) {
+            if ($currentNumber -ge $target.First -and 
+                $currentNumber -le $target.Last -and 
+                -not $Seen.Contains($currentNumber)) {
                 $Seen.Add($currentNumber) | Out-Null
+                [PSCustomObject]@{
+                    Number = $currentNumber
+                    isValid = $true
+                }
+                break
             }
         }
+
+        $TargetNumbers.ForEach({
+            if (-not $Seen.Contains($currentNumber) -and -not $Checked.Contains($currentNumber)) {
+
+                $Checked.Add($currentNumber) | Out-Null
+                [PSCustomObject]@{
+                    Number = $currentNumber
+                    IsValid = $false
+                }
+            }
+        })
     })
-
 }
-
-foreach ($oth in ($Tickets -split ',').Where({ $_ -match '\d' })) {
-    Write-Verbose -Message "$oth"
-    if (-not $Seen.Contains($oth)) {
-        [PSCustomObject]@{
-            Number = $oth
-            IsValid = $false
-        }
-    }
-}
-
-
 #endregion
