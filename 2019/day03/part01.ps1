@@ -3,56 +3,16 @@ param (
 	[string] $Path
 )
 
+#region import functions
+. /home/soneill/git/AdventofCode/2019/day03/ConvertTo-WireInstructions.ps1
+#endregion
+
 $TestLines = Get-Content -Path $Path
 
 $Wire01, $Wire02 = $TestLines -split '\r?\n'
 
 Write-Verbose "Wire 01: [$Wire01]"
 Write-Verbose "Wire 02: [$Wire02]"
-
-function ConvertTo-WireInstructions {
-	[CmdletBinding()]
-	param(
-		[Parameter(
-			Mandatory,
-			ValueFromPipeline,
-			ValueFromPipelineByPropertyName
-		)]
-		[string] $Wire
-	)
-
-	process {
-		foreach ($WireInstruction in $Wire) {
-			Write-Verbose "Working on: [$WireInstruction]"
-			$Instructions = $WireInstruction -split ','
-
-			$Iteration = 1
-
-			foreach ($Instruction in $Instructions) {
-				Write-Verbose "Working on instruction: [$Instruction]"
-
-				$XDelta = 0
-				$YDelta = 0
-
-				switch ($Instruction) {
-					{$Instruction.Substring(0, 1) -eq 'R'} {$XDelta = 1 * ($Instruction.Substring(1) -as [int])}
-					{$Instruction.Substring(0, 1) -eq 'L'} {$XDelta = -1 * ($Instruction.Substring(1) -as [int])}
-					{$Instruction.Substring(0, 1) -eq 'U'} {$YDelta = 1 * ($Instruction.Substring(1) -as [int])}
-					{$Instruction.Substring(0, 1) -eq 'D'} {$YDelta = -1 * ($Instruction.Substring(1) -as [int])}
-				}
-
-				[PSCustomObject] @{
-					MoveId = $Iteration
-					Instruction = $Instruction
-					XDelta = $XDelta
-					YDelta = $YDelta
-				}
-
-				$Iteration++
-			}
-		}
-	}
-}
 
 function ConvertTo-WirePath {
 	[CmdletBinding()]
