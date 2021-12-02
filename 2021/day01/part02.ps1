@@ -8,10 +8,9 @@ param (
 )
 
 $Measurements = Get-Content -Path $Path
-$GroupLetter = 1
 
 $IncreasedCounter = 0
-for ($i = 3; $i -lt $Measurements.Count; $i++) {
-   if ([int]$Measurements[$i] -gt [int]$Measurements[$i - 3]) {$IncreasedCounter++}
+for ($i = $Groups; $i -lt $Measurements.Count; $i++) {
+   if ([int]$Measurements[$i] -gt [int]$Measurements[$i - $Groups]) {$IncreasedCounter++}
 }
 "Increased $IncreasedCounter times"
