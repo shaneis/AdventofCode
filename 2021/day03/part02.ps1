@@ -24,10 +24,16 @@ foreach ($Iteration in (0..($DiagnosticReportLength -1))) {
     }
 
     Write-Verbose "Getting most common bit for iteration $Iteration"
-    $MostCommonBit = $DiagnosticReport | Where-Object {$_[$Iteration] -eq ($DiagnosticReport | Get-MostCommonBit -Position $Iteration).Name}
+    $MostCommonBit = $DiagnosticReports | Get-MostCommonBit -Position $Iteration
 
-    Write-Verbose "Removing reports that do not have $MostCommonBit in position $Iteration"
-    $DiagnosticReports = $DiagnosticReports | Where-Object {$_[$Iteration] -eq $MostCommonBit}
+    Write-Verbose "Removing reports that do not have $($MostCommonBit.Name) in position $Iteration"
+    $DiagnosticReports = $DiagnosticReports | Where-Object {
+        $_[$Iteration] -eq $MostCommonBit.Name
+    }
+
+    Write-Verbose "New diagnostic reports"
+    Write-Verbose "$([Environment]::NewLine)$($DiagnosticReports | Out-String)"
 }
 
-$DiagnosticReport
+$OxygenGeneratorRating = [Convert]::ToInt64($DiagnosticReports, 2)
+$OxygenGeneratorRating
