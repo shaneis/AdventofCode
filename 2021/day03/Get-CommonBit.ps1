@@ -1,4 +1,4 @@
-function Get-MostCommonBit {
+function Get-CommonBit {
     [CmdletBinding()]
     param (
         [Parameter(
@@ -8,7 +8,10 @@ function Get-MostCommonBit {
         )]
         $Data,
 
-        $Position
+        $Position,
+
+        [ValidateSet('O2', 'CO2')]
+        [string] $Type
     )
     
     begin {
@@ -28,12 +31,24 @@ function Get-MostCommonBit {
         Group-Object -NoElement 
 
         if ($GroupedElements[0].Count -eq $GroupedElements[1].Count) {
-            $GroupedElements | Where-Object Name -eq '1'
+            if ($Type -eq 'O2') {
+                $GroupedElements | Where-Object Name -eq '1'
+            }
+            else {
+                $GroupedElements | Where-Object Name -eq '0'
+            }
         }
         else {
-            $GroupedElements |
-            Sort-Object Count -Descending |
-            Select-Object -First 1
+            if ($Type -eq 'O2') {
+                $GroupedElements |
+                Sort-Object Count -Descending |
+                Select-Object -First 1
+            }
+            else {
+                $GroupedElements |
+                Sort-Object Count -Descending |
+                Select-Object -Last 1
+            }
         }
     }
 }
