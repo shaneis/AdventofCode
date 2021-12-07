@@ -34,6 +34,8 @@ $TotalReport = $SummaryReport |
         Name = 'EpsilonDecimal'; Expression = {[Convert]::ToInt64(($SummaryReport.Epsilon -join ''), 2)}
     } 
 
+$TotalReport | Format-Table
+
 $FirstGamma = $TotalReport[0].GammaDecimal
 $FirstEpsilon = $TotalReport[0].EpsilonDecimal
 "Submarine power consumption: Gamma $FirstGamma * Epsilon $FirstEpsilon = $($FirstGamma * $FirstEpsilon)"
