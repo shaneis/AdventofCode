@@ -30,7 +30,10 @@ function Test-Row {
 	}
 
 	process {
-		foreach ($BoardRow in $Board -split '\r?\n') {
+		$BoardRows = $Board -split '\r?\n' |
+			Select-Object -First 1 -Skip ($Row -1)
+
+		foreach ($BoardRow in $BoardRows) {
 			foreach ($n in ($BoardRow -split ' ')) {
 				if ($n -notin $CalledNumbers) {
 					$IsComplete = $false
