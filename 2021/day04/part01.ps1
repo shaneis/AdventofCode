@@ -21,8 +21,6 @@ foreach ($Board in $Boards) {
     $Board
 }
 
-$PastNumbers = [Collections.Generic.List[int]]::new()
-
 $Complete = $false
 do {
 		# Need at least 5 numbers to have a match
