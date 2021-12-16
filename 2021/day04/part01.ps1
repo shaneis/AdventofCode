@@ -16,36 +16,38 @@ $PuzzleInput = Get-Content -Path $Path -Raw
 $Boards = $PuzzleInput -split '\n\n' |
     Select-Object -Skip 1
 
-foreach ($Board in $Boards) {
-    "Board:"
-    $Board
+$BoardID = 0
+$BoardObjects = foreach ($Board in $Boards) {
+	[PSCustomObject] @{
+		BoardID = $BoardID++
+		Board = $Board
+		IsComplete = $false
+	}
 }
-
-$PastNumbers = [Collections.Generic.List[int]]::new()
 
 $Complete = $false
 do {
 		# Need at least 5 numbers to have a match
 		foreach ($end in 5..$DrawnNumbers.Count) {
-		$BoardID = 0
-			foreach ($Board in $Boards) {
-				$BoardID++
-				Write-Verbose "Checking Board: $BoardID for $end out of $($DrawnNumbers.Count)"
+			foreach ($Board in $BoardObjects | Where-Object {-not $_.IsComplete}) {
+				Write-Verbose "Checking Board: $($Board.BoardID) for $end out of $($DrawnNumbers.Count)"
 
-				foreach ($rc in 1..5) {
-					$Params = @{
-						Board = $Board
+				$Params = @{
+						Board = $Board.Board
 						CalledNumbers = $DrawnNumbers[0..$end]
 					}
+				foreach ($rc in 1..5) {
+					
 					$Row = Test-Row @Params -Row $rc -Verbose:$false
 					$Column = Test-Column @Params -Column $rc -Verbose:$false
 
 					if ($Row.IsComplete -or $Column.IsComplete -and -not $Complete) {
 						$FinalNumbers = $DrawnNumbers[0..$end]
 						$FinalNumbers -join ','
-						"Board: $BoardID"
-						Show-BingoBoard -Board $Board -CalledNumber $DrawnNumbers[0..$end] -Verbose:$false
+						"Board: $($Board.BoardID)"
+						Show-BingoBoard -Board $Board.Board -CalledNumber $DrawnNumbers[0..$end] -Verbose:$false
 						$Complete = $true
+						$Board.IsComplete = $true
 					}
 					
 					if ($Complete) {break}
