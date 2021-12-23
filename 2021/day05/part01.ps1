@@ -23,43 +23,64 @@ $VentLineObjects = foreach ($VentLine in $VentLines) {
     }
 }
 
-foreach ($VentLineObject in $VentLineObjects) {
+$AllVentLines = foreach ($VentLineObject in $VentLineObjects) {
     [int] $startX = $VentLineObject.x1
     [int] $startY = $VentLineObject.y1
-    [int] $endX = $VentLineObject.x2
-    [int] $endY = $VentLineObject.y2
+    [int] $EndX = $VentLineObject.x2
+    [int] $EndY = $VentLineObject.y2
+    [int] $OrigX = $VentLineObject.x1
+    [int] $OrigY = $VentLineObject.y1
 
     do {
         [PSCustomObject]@{
             VentObjectID   = $VentLineObject.VentObjectID
             VentObjectLine = $VentLineObject.FullLine
+            StartX         = $OrigX
+            StartY         = $OrigY
+            EndX           = $EndX
+            EndY           = $EndY
             X              = $startX
             Y              = $startY
         }
 
-        if ($startX -lt $endX) {
+        if ($startX -lt $EndX) {
             $startX++
         }
-        elseif ($startX -gt $endX) {
+        elseif ($startX -gt $EndX) {
             $startX--
         }
-        if ($startY -lt $endY) {
+        if ($startY -lt $EndY) {
             $startY++
         }
-        elseif ($startY -gt $endY) {
+        elseif ($startY -gt $EndY) {
             $startY--
         }
-    } while ($startX -ne $endX -or $startY -ne $endY)
+    } while ($startX -ne $EndX -or $startY -ne $EndY)
 
 
     # Can't be bothered figuring out the off by one error
-    if ($startX -ne $endX) { $startX -lt $endX ? ($startX++) : ($startX--) }
-    if ($startY -ne $endY) { $startY -lt $endY ? ($startY++) : ($startY--) }
+    if ($startX -ne $EndX) { $startX -lt $EndX ? ($startX++) : ($startX--) }
+    if ($startY -ne $EndY) { $startY -lt $EndY ? ($startY++) : ($startY--) }
 
     [PSCustomObject]@{
         VentObjectID   = $VentLineObject.VentObjectID
         VentObjectLine = $VentLineObject.FullLine
+        StartX         = $OrigX
+        StartY         = $OrigY
+        EndX           = $EndX
+        EndY           = $EndY
         X              = $startX
         Y              = $startY
     }
 }
+
+$HVLines = foreach ($VL in $AllVentLines) {
+    # Only interested in horizontal or vertical lines
+    if ($VL.StartX -eq $VL.EndX -or $VL.StartY -eq $VL.EndY) {
+        $VL
+    }
+}
+
+($HVLines |
+    Group-Object -Property X, Y -NoElement |
+    Where-Object Count -gt 1).Count
