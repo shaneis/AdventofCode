@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 )
 
@@ -18,10 +19,9 @@ func (e Elf) addCalories(addedCalories int) Elf {
 	return e
 }
 
-func part01(filename string) string {
+func parseInput(filename string) []Elf {
 	var (
-		elves      []Elf
-		fattestElf int
+		elves []Elf
 	)
 
 	// Dealing with the file
@@ -69,19 +69,32 @@ func part01(filename string) string {
 		}
 	}
 
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return elves
+}
+
+func main() {
+	var (
+		filename      string = "input.txt" // "sample_input_01.txt"
+		fattestElf    int
+		totalCalories int = 0
+	)
+	elves := parseInput(filename)
+
 	for i := range elves {
 		if elves[i].calories > elves[fattestElf].calories {
 			fattestElf = i
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
-	return fmt.Sprintf("The fattest elf is at index %d %+v\n", fattestElf, elves[fattestElf])
-}
+	sort.Slice(elves, func(i, j int) bool { return elves[i].calories > elves[j].calories })
 
-func main() {
-	filename := "input.txt" // "sample_input_01.txt"
-	fmt.Println(part01(filename))
+	for i := 0; i < 3; i++ {
+		totalCalories += elves[i].calories
+	}
+
+	fmt.Printf("Part 01:\t%d\n", elves[fattestElf].calories)
+	fmt.Printf("Part 02:\t%d\n", totalCalories)
 }
