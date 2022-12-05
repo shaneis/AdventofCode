@@ -18,9 +18,8 @@ func (e Elf) addCalories(addedCalories int) Elf {
 	return e
 }
 
-func main() {
+func part01(filename string) string {
 	var (
-		filename   = "input.txt" // "sample_input_01.txt"
 		elves      []Elf
 		fattestElf int
 	)
@@ -71,14 +70,18 @@ func main() {
 	}
 
 	for i := range elves {
-		fmt.Printf("Elf %d has %d calories\n", elves[i].elfid, elves[i].calories)
 		if elves[i].calories > elves[fattestElf].calories {
 			fattestElf = i
 		}
 	}
-	fmt.Printf("The fattest elf is at index %d %+v\n", fattestElf, elves[fattestElf])
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
+	return fmt.Sprintf("The fattest elf is at index %d %+v\n", fattestElf, elves[fattestElf])
+}
+
+func main() {
+	filename := "input.txt" // "sample_input_01.txt"
+	fmt.Println(part01(filename))
 }
