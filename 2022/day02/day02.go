@@ -33,6 +33,12 @@ var (
 		"draw": 3,
 		"won":  6,
 	}
+
+	retorts = map[string]string{
+		"X": "lose",
+		"Y": "draw",
+		"Z": "win",
+	}
 )
 
 type Outcome struct {
@@ -60,7 +66,7 @@ func NewOutcome(
 }
 
 func getSelectedPoints(entry string) int {
-	return sPoints[col2[entry]]
+	return sPoints[entry]
 }
 
 func getVersusPoints(entry string) int {
@@ -83,10 +89,34 @@ func getResultOutcome(player1 string, player2 string) string {
 	return "lost"
 }
 
-func parseFile(filename string) []Outcome {
+func getRetort(opp string, want string) string {
+	win := map[string]string{
+		"Rock":     "Paper",
+		"Paper":    "Scissors",
+		"Scissors": "Rock",
+	}
+	lose := map[string]string{
+		"Rock":     "Scissors",
+		"Paper":    "Rock",
+		"Scissors": "Paper",
+	}
+
+	if want == "win" {
+		return win[opp]
+	}
+	if want == "lose" {
+		return lose[opp]
+	}
+	return opp
+}
+
+func parseFile(filename string, part int) []Outcome {
 	var (
 		Outcomes []Outcome
 	)
+	if part != 1 && part != 2 {
+		log.Panic("part can only be 1 or 2")
+	}
 
 	file, err := os.Open(filename)
 	if err != nil {
@@ -100,11 +130,27 @@ func parseFile(filename string) []Outcome {
 		l := scnr.Text()
 
 		first, second, _ := strings.Cut(l, " ")
-		s := getSelectedPoints(second)
+		ourC := getRetort(col1[first], retorts[second])
 		// _ := getVersusPoints(first)
-		res := getResultOutcome(col2[second], col1[first])
-		pnts := sPoints[col2[second]] + rPoints[res]
-		r := NewOutcome(col2[second], col1[first], s, res, pnts)
+		var (
+			res  string
+			s    int
+			pnts int
+			r    *Outcome
+		)
+		if part == 1 {
+			res = getResultOutcome(col2[second], col1[first])
+			s = getSelectedPoints(col2[second])
+			pnts = sPoints[col2[second]] + rPoints[res]
+
+			r = NewOutcome(col2[second], col1[first], s, res, pnts)
+		} else {
+			res = getResultOutcome(ourC, col1[first])
+			s = getSelectedPoints(ourC)
+			pnts = sPoints[ourC] + rPoints[res]
+
+			r = NewOutcome(ourC, col1[first], s, res, pnts)
+		}
 		fmt.Printf("Result: %+v\n", r)
 		Outcomes = append(Outcomes, *r)
 	}
@@ -113,11 +159,12 @@ func parseFile(filename string) []Outcome {
 
 func main() {
 	file := flag.String("filename", "sample_input_01.txt", "the name of the file to parse")
+	part := flag.Int("part", 1, "the part you want to solve for")
 	flag.Parse()
 
 	fmt.Printf("File passed in: %s\n", *file)
 
-	Outcomes := parseFile(*file)
+	Outcomes := parseFile(*file, *part)
 
 	var ttl int
 	for _, x := range Outcomes {
