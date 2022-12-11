@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func readLine(file string, part int) []string {
+func readLine(file string) []string {
 	var ret []string
 	f, err := os.Open(file)
 	if err != nil {
@@ -65,6 +65,49 @@ func findCommonLetter(first, second string) (rune, error) {
 	return -1, errors.New("No common string found")
 }
 
+func findCommonLetterInLines(line []string) (rune, error) {
+	runeMap := make(map[rune]int)
+	lineCount := len(line)
+	for _, s := range line {
+		// make a set cause we have dups per line
+		set := make(map[rune]int)
+		for _, u := range s {
+			_, e := set[u]
+			if e == false {
+				set[u] = 1
+			}
+		}
+		for r := range set {
+			runeMap[r] += 1
+		}
+	}
+	for k, v := range runeMap {
+		if v == lineCount {
+			return k, nil
+		}
+	}
+	return -1, errors.New("No common element found")
+}
+
+func getPriorities(chars []rune) []int {
+	var (
+		lowerP int = int('a')
+		upperP int = int('A')
+		res    []int
+	)
+	for i := 0; i < len(chars); i++ {
+		rInt := int(chars[i])
+		pr := rInt - upperP
+		if pr < 26 && pr >= 0 {
+			res = append(res, pr+27)
+			continue
+		} else {
+			res = append(res, rInt-lowerP+1)
+		}
+	}
+	return res
+}
+
 func part01(line []string) int {
 	// Parse lines into 2
 	rcks := parseLine(line)
@@ -72,41 +115,57 @@ func part01(line []string) int {
 	var (
 		dups []int
 		ps   int
-		pr   int
+		// pr   int
+		cls []rune
 	)
 	for _, r := range rcks {
 		cl, e := findCommonLetter(r.Comp1, r.Comp2)
 		if e != nil {
 			log.Fatal(e)
 		}
-		// Get priority
-		intcl := int(cl) - int('A')
-		if intcl < 26 && intcl >= 0 {
-			pr = intcl + 27
-		} else {
-			pr = int(cl) - int('a') + 1
-		}
-		dups = append(dups, pr)
+		cls = append(cls, cl)
 	}
+	// Get priority
+	dups = getPriorities(cls)
 	// Sum priorities
 	for _, p := range dups {
 		ps += p
 	}
 	return ps
 }
+
+func part02(line []string) int {
+	var (
+		init int
+		ls   []rune
+		bPrs int
+	)
+	init = 0
+	for i := 3; i <= len(line); i += 3 {
+		l, e := findCommonLetterInLines(line[init:i])
+		if e != nil {
+			log.Fatal(e)
+		}
+		init = i
+		ls = append(ls, l)
+	}
+	// Priorities
+	prs := getPriorities(ls)
+	for _, p := range prs {
+		bPrs += p
+	}
+	return bPrs
+}
+
 func main() {
 
 	// fmt.Printf("Hello, world\n")
 	var (
 		file = flag.String("FileName", "sample_input_01.txt", "The name of the file to parse")
-		part = flag.Int("Part", 1, "Solve either part 1 or part 2")
 	)
 	flag.Parse()
-	if *part != 1 && *part != 2 {
-		log.Panic("part can only be 1 or 2")
-	}
-	fmt.Printf("Solving part %d for file %s\n", *part, *file)
-	line := readLine(*file, *part)
+	line := readLine(*file)
 
 	fmt.Println("Part01: ", part01(line))
+	fmt.Println("Part02: ", part02(line))
 }
