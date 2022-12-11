@@ -65,22 +65,16 @@ func findCommonLetter(first, second string) (rune, error) {
 	return -1, errors.New("No common string found")
 }
 
-func part01(file *string, part *int) int {
-	// Part 01
-	// Read lines
-	line := readLine(*file, *part)
+func part01(line []string) int {
 	// Parse lines into 2
 	rcks := parseLine(line)
-	// for _, x := range rcks {
-	// fmt.Printf("Parsed: %+v\n", x)
-	// }
 	// Get common letter
 	var (
 		dups []int
 		ps   int
+		pr   int
 	)
 	for _, r := range rcks {
-		var pr int
 		cl, e := findCommonLetter(r.Comp1, r.Comp2)
 		if e != nil {
 			log.Fatal(e)
@@ -112,6 +106,7 @@ func main() {
 		log.Panic("part can only be 1 or 2")
 	}
 	fmt.Printf("Solving part %d for file %s\n", *part, *file)
+	line := readLine(*file, *part)
 
-	fmt.Println("Part01: ", part01(file, part))
+	fmt.Println("Part01: ", part01(line))
 }
