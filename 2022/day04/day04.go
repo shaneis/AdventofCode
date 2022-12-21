@@ -31,6 +31,45 @@ func part01(file string) int {
 	return numTrue
 }
 
+func part02(file string) int {
+	var (
+		numTrue int
+	)
+	f, err := os.Open(file)
+	if err != nil {
+		fmt.Printf("Cannot open file: %s", file)
+		log.Fatal(err)
+	}
+	scnr := bufio.NewScanner(f)
+	for scnr.Scan() {
+		xs := string(scnr.Text())
+		// 		fmt.Printf("Parsing: %s\n", xs)
+		parsed := getRanges(xs)
+		for _, val := range parsed {
+			if val == 2 {
+				numTrue++
+				break
+			}
+		}
+	}
+	return numTrue
+}
+
+func getRanges(line string) map[int]int {
+	var elves = make(map[int]int)
+	// make the hash
+	sections := strings.Split(string(line), ",")
+	for _, elfSec := range sections {
+		eSec := strings.Split(elfSec, "-")
+		start, _ := strconv.Atoi(string(eSec[0]))
+		finish, _ := strconv.Atoi(string(eSec[1]))
+		for i := start; i <= finish; i++ {
+			elves[i]++
+		}
+	}
+	return elves
+}
+
 func parseLine(line string) bool {
 	var (
 		elves = make(map[int]int)
@@ -72,5 +111,9 @@ func main() {
 	fmt.Printf("Solving part 01 for file: %s\n", *f)
 	p1 := part01(*f)
 
-	fmt.Printf("Part 01: %d", p1)
+	fmt.Printf("Solving part 02 for file: %s\n", *f)
+	p2 := part02(*f)
+
+	fmt.Printf("Part 01: %d\n", p1)
+	fmt.Printf("Part 02: %d\n", p2)
 }
