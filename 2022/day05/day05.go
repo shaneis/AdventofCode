@@ -246,6 +246,82 @@ func moveCrate(crates []Header, actions Instr) []Header {
 	return result
 }
 
+func moveCratesAllTogether(crates []Header, actions Instr) []Header {
+	var result []Header
+
+	newCrates, values := getNCrates(crates, actions)
+
+	newCrates = resetLocation(newCrates, actions.to)
+	// addNCrates(nCrates)
+	result = append(result, newCrates...)
+	for i := len(values) - 1; i >= 0; i-- {
+		addH := add(result, values[i], actions.to)
+		if debug {
+			fmt.Printf("[moveCratesAllTogether] Adding %+v\n\n", addH)
+		}
+		result = append(result, addH)
+		if debug {
+			for _, x := range result {
+				fmt.Printf("[moveCratesAllTogether] After moving:%+v\n", x)
+			}
+		}
+		result = resetLocation(result, actions.to)
+	}
+	return result
+}
+
+func resetLocation(crates []Header, Column int) []Header {
+	sort.SliceStable(crates, func(i, j int) bool {
+		if crates[i].Column > crates[j].Column {
+			return true
+		}
+		if crates[i].Column == crates[j].Column && crates[i].Location > crates[j].Location {
+			return true
+		}
+		return false
+	})
+
+	var redoLoc bool
+	for j := 0; j < len(crates); j++ {
+		if crates[j].Column == Column && crates[j].Location == 1 {
+			redoLoc = true
+			if debug {
+				fmt.Println("[resetLocation] Redo location:", redoLoc)
+			}
+		}
+	}
+	if redoLoc {
+		if debug {
+			fmt.Println("[resetLocation] Before location increase:")
+			for _, x := range crates {
+				fmt.Printf("%+v\n", x)
+			}
+		}
+		for i := 0; i < len(crates); i++ {
+			crates[i].Location += 1
+		}
+		if debug {
+			fmt.Println("[resetLocation] After location increase:")
+			for _, x := range crates {
+				fmt.Printf("%+v\n", x)
+			}
+		}
+	}
+
+	return crates
+}
+
+func getNCrates(crates []Header, actions Instr) ([]Header, []string) {
+	var ret []string
+	var cv string
+	crs := crates
+	for i := 0; i < actions.amount; i++ {
+		crs, cv = delete(crs, actions.from)
+		ret = append(ret, cv)
+	}
+	return crs, ret
+}
+
 func showCrates(crates []Header) {
 	var (
 		highest int
@@ -374,12 +450,87 @@ func part01(file string) string {
 	return answer
 }
 
+func part02(file string) string {
+	lines := readLines(file)
+
+	headerLines := getHeaderLines(lines)
+	if debug {
+		for _, h := range headerLines {
+			fmt.Println("Header line:", h)
+		}
+	}
+	header := parseHeader(headerLines)
+	if debug {
+		fmt.Println("Header:")
+		for _, x := range header {
+			fmt.Printf("%+v\n", x)
+		}
+	}
+
+	instrs := getInstructionLines(lines)
+	for _, instr := range instrs {
+		actions := parseInstr(instr)
+		if debug {
+			fmt.Printf("Instruction: %+v\n", actions)
+		}
+		header = moveCratesAllTogether(header, actions)
+		if debug {
+			showCrates(header)
+			fmt.Println()
+		}
+	}
+
+	var columns = make(map[int]Header, 3)
+	var topCrates []string
+
+	for i := 0; i < len(header); i++ {
+		currMap, ok := columns[header[i].Column]
+		if debug {
+			fmt.Println("currMap:", currMap, "ok:", ok)
+		}
+		if !ok {
+			if debug {
+				fmt.Println("Setting currMap:", currMap, "to:", header[i])
+			}
+			currMap = header[i]
+			columns[header[i].Column] = header[i]
+		}
+
+		if currMap.Location > header[i].Location && currMap.Column == header[i].Column {
+			if debug {
+				fmt.Printf("From:%v", columns[header[i].Location])
+			}
+			columns[header[i].Column] = header[i]
+			if debug {
+				fmt.Printf("To:%v\n", columns[header[i].Location])
+			}
+		}
+		if debug {
+			fmt.Println("this iteration currMap is:", currMap)
+			fmt.Println("Columns:", columns)
+		}
+	}
+
+	for i := 1; i <= len(columns); i++ {
+		for _, v := range columns {
+			if v.Column == i {
+				topCrates = append(topCrates, v.crateName)
+			}
+		}
+	}
+	answer := strings.Join(topCrates, "")
+
+	return answer
+}
+
 func main() {
 	f := flag.String("filename", "sample_input_01.txt", "name of the input file")
 	flag.Parse()
 
 	fmt.Println("Parsing file:", *f)
 	topCrates := part01(*f)
+	properTopCrates := part02(*f)
 
-	fmt.Println("Top crates:", topCrates)
+	fmt.Println("Part 01:", topCrates)
+	fmt.Println("Part 02:", properTopCrates)
 }
