@@ -13,8 +13,10 @@ func main() {
 	flag.Parse()
 
 	p1 := part01(*f)
+	p2 := part02(*f)
 
 	fmt.Println("Part 01:", p1)
+	fmt.Println("Part 02:", p2)
 }
 
 func part01(file string) int {
@@ -29,16 +31,31 @@ func part01(file string) int {
 		line = scnr.Text()
 	}
 
-	result := findStartingMarker(line)
+	result := findStartingMarker(line, 4)
 	return result
 }
 
-func findStartingMarker(line string) int {
-	start, end := 0, 4
+func part02(file string) int {
+	var line string
+	read, err := os.Open(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	scnr := bufio.NewScanner(read)
+	for scnr.Scan() {
+		line = scnr.Text()
+	}
+
+	result := findStartingMarker(line, 14)
+	return result
+}
+
+func findStartingMarker(line string, groupSize int) int {
+	start, end := 0, groupSize
 	stopPoint := len(line)
 
 	for end < stopPoint {
-		// 		fmt.Println("Checking", line[start:end], ", start", start, "end", end, "stopPoint", stopPoint)
 
 		matched := false
 		matchedI := start
@@ -46,7 +63,6 @@ func findStartingMarker(line string) int {
 	MatchCheck:
 		for ; matchedI < end; matchedI++ {
 			for matchedJ = matchedI + 1; matchedJ < end; matchedJ++ {
-				// 				fmt.Println("Comparing", matchedI, string(line[matchedI]), "with", matchedJ, string(line[matchedJ]))
 				if line[matchedI] == line[matchedJ] {
 					matched = true
 					break MatchCheck
@@ -55,9 +71,6 @@ func findStartingMarker(line string) int {
 		}
 
 		if matched {
-			// 			fs := string(line[matchedI])
-			// 			ss := string(line[matchedJ])
-			// 			fmt.Printf("Matched %q against %q, (%d:%d)\n", fs, ss, matchedI, matchedJ)
 			end++
 			start++
 			continue
