@@ -57,10 +57,8 @@ func part01(lines []string, debug bool) int {
 
 	tree := parseLines(lines, debug)
 	nodes := tree.iterate()
-	for index, node := range nodes {
-		fmt.Printf("[%2d]Iterating over node: %q\n", index, node.Name)
+	for _, node := range nodes {
 		nodeSize := node.getSize(debug)
-		fmt.Printf("Size: %d\n", node.getSize(debug))
 		if nodeSize <= 100000 {
 			sizes += nodeSize
 		}
@@ -242,7 +240,6 @@ func (n *Node) iterate() []Node {
 
 	for len(stack) > 0 {
 		node := stack[0]
-		fmt.Println("Node:", node)
 		for i := 0; i <= len(node.Children)-1; i++ {
 			if node.Children[i].IsFile != true {
 				stack = append(stack, *node.Children[i])
@@ -294,20 +291,22 @@ func showTree(n *Node, depth int, debug bool) {
 }
 
 func part02(lines []string, debug bool) int {
-	var sizeFreed int
-
 	totalSize := 70000000
+	updateSize := 30000000
+	sizeFreed := totalSize
 
 	filetree := parseLines(lines, debug)
-	nodes := filetree.iterate()
-	for index, node := range nodes {
-		if node.Name == "/" {
-			fmt.Printf("[%2d] Node %q, Size: %d\n", index, node.Name, node.getSize(debug))
-		}
-	}
 	sizeUsed := filetree.getSize(debug)
 	sizeRemaining := totalSize - sizeUsed
-	fmt.Printf("Total Size: %d. Size Used: %d. Size Remaining: %d\n", totalSize, sizeUsed, sizeRemaining)
-
+	sizeRequired := updateSize - sizeRemaining
+	nodes := filetree.iterate()
+	for _, node := range nodes {
+		nodeSize := node.getSize(debug)
+		if nodeSize >= sizeRequired {
+			if nodeSize < sizeFreed {
+				sizeFreed = nodeSize
+			}
+		}
+	}
 	return sizeFreed
 }
