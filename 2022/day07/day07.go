@@ -18,16 +18,7 @@ type Node struct {
 	Children    []*Node
 }
 
-var (
-	root = Node{
-		Parent:   nil,
-		Name:     "/",
-		IsFile:   false,
-		Order:    1,
-		Size:     0,
-		Children: nil,
-	}
-)
+var ()
 
 func main() {
 	f := flag.String("filename", "sample_input_01.txt", "file name for input")
@@ -37,6 +28,7 @@ func main() {
 	lines := readLines(*f, *d)
 
 	fmt.Println("Part 01:", part01(lines, *d))
+	fmt.Println("Part 02:", part02(lines, *d))
 }
 
 func readLines(file string, debug bool) []string {
@@ -73,27 +65,21 @@ func part01(lines []string, debug bool) int {
 			sizes += nodeSize
 		}
 	}
-	// nodeSizes = tree.getSize(debug)
-	// nodeSizes := getSize(tree, debug)
-	// if debug {
-	// 	for k, v := range nodeSizes {
-	// 		if v <= 100000 {
-	// 			fmt.Printf("Name: %q - Size: %d - ", k, v)
-	// 			fmt.Print("TRUE\n")
-	// 		}
-	// 	}
-	// }
-	// for _, v := range nodeSizes {
-	// 	if v <= 100000 {
-	// 		sizes += v
-	// 	}
-	// }
 
 	return sizes
 }
 
 func parseLines(lines []string, debug bool) *Node {
-	var currentNode *Node = &root
+	var currentNode *Node
+	root := &Node{
+		Parent:   nil,
+		Name:     "/",
+		IsFile:   false,
+		Order:    1,
+		Size:     0,
+		Children: nil,
+	}
+	currentNode = root
 	for index := 0; index < len(lines); {
 
 		tokens := strings.Fields(lines[index])
@@ -126,15 +112,20 @@ func parseLines(lines []string, debug bool) *Node {
 		index++
 	}
 	if debug {
-		showTree(&root, 1, debug)
+		showTree(root, 1, debug)
 	}
-	return &root
+	return root
 }
 
 func setLocation(StartingPoint *Node, location string, debug bool) *Node {
+	var returnNode *Node
 	switch location {
 	case "/":
-		return &root
+		returnNode = StartingPoint
+		for returnNode.Parent != nil {
+			returnNode = StartingPoint.Parent
+		}
+		return returnNode
 	case "..":
 		if StartingPoint.Parent == nil {
 			log.Fatal()
@@ -200,7 +191,8 @@ func (n *Node) addFile(name string, order, size int, debug bool) {
 }
 
 func (n *Node) getSize(debug bool) int {
-	size := n.Size
+	var size int
+	size = n.Size
 	var stack []Node
 	//DFS?
 	for i := 0; i <= len(n.Children)-1; i++ {
@@ -282,16 +274,6 @@ func addToStack(n *Node, debug bool) []Node {
 		}
 	}
 
-	//	if n.IsFile != true {
-	//		results = append(results, *n)
-	//	}
-	//	if len(n.Children) != 0 {
-	//		for i := 0; i <= len(n.Children)-1; i++ {
-	//			if n.Children[i].IsFile != true {
-	//				results = append(results, addToStack(n.Children[i], debug)...)
-	//			}
-	//		}
-	//	}
 	return results
 }
 
@@ -309,4 +291,23 @@ func showTree(n *Node, depth int, debug bool) {
 			showTree(n.Children[i], depth, debug)
 		}
 	}
+}
+
+func part02(lines []string, debug bool) int {
+	var sizeFreed int
+
+	totalSize := 70000000
+
+	filetree := parseLines(lines, debug)
+	nodes := filetree.iterate()
+	for index, node := range nodes {
+		if node.Name == "/" {
+			fmt.Printf("[%2d] Node %q, Size: %d\n", index, node.Name, node.getSize(debug))
+		}
+	}
+	sizeUsed := filetree.getSize(debug)
+	sizeRemaining := totalSize - sizeUsed
+	fmt.Printf("Total Size: %d. Size Used: %d. Size Remaining: %d\n", totalSize, sizeUsed, sizeRemaining)
+
+	return sizeFreed
 }
