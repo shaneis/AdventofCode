@@ -45,9 +45,9 @@ func main() {
 	flag.Parse()
 
 	input := parseFile(f)
-	for index, line := range input {
-		log.Printf("[%2d] line: %q\n", index, line)
-	}
+	// for index, line := range input {
+	// log.Printf("[%2d] line: %q\n", index, line)
+	// }
 
 	log.Printf("Part 01: %d\n", part01(input))
 	log.Printf("Part 02: %d\n", part02(input))
@@ -197,26 +197,22 @@ func visibleFromRight(input []string, treeToCheck Tree) bool {
 }
 
 func part02(input []string) int {
+	var maxScore int = 0
+
 	allTrees := createTrees(input)
 	sort.Stable(allTrees)
 
 	for i := 0; i < len(allTrees); i++ {
-		allTrees[i].isVisible = visibleFromTop(input, allTrees[i])
-		allTrees[i].isVisible = visibleFromBottom(input, allTrees[i])
-		allTrees[i].isVisible = visibleFromLeft(input, allTrees[i])
-		allTrees[i].isVisible = visibleFromRight(input, allTrees[i])
-
-		if allTrees[i].isVisible == true {
-			allTrees[i].score = getTreeScore(input, allTrees[i])
-		}
-
-		log.Printf("Tree: %+v\n\n", allTrees[i])
+		newScore := getTreeScore(input, allTrees[i])
+		allTrees[i].updateScore(newScore)
 	}
 
 	for _, t := range allTrees {
-		log.Printf("%+v\n", t)
+		if t.score > maxScore {
+			maxScore = t.score
+		}
 	}
-	return 0
+	return maxScore
 }
 
 func getTreeScore(input []string, tree Tree) int {
@@ -242,7 +238,7 @@ func getTreeScore(input []string, tree Tree) int {
 			break
 		}
 	}
-	log.Printf("Tree: %+v, Top score: %d\n", tree, topScore)
+	// log.Printf("Tree: %+v, Top score: %d\n", tree, topScore)
 	// Bottom
 	for i := treeRow + 1; i <= len(input)-1; i++ {
 		bottomScore++
@@ -255,7 +251,7 @@ func getTreeScore(input []string, tree Tree) int {
 			break
 		}
 	}
-	log.Printf("Tree: %+v, Bottom score: %d\n", tree, bottomScore)
+	// log.Printf("Tree: %+v, Bottom score: %d\n", tree, bottomScore)
 	// Left
 	for i := treeCol - 1; i >= 0; i-- {
 		leftScore++
@@ -268,7 +264,7 @@ func getTreeScore(input []string, tree Tree) int {
 			break
 		}
 	}
-	log.Printf("Tree: %+v, Left score: %d\n", tree, leftScore)
+	// log.Printf("Tree: %+v, Left score: %d\n", tree, leftScore)
 	// Right
 	for i := treeCol + 1; i <= len(input[treeRow])-1; i++ {
 		rightScore++
@@ -281,7 +277,7 @@ func getTreeScore(input []string, tree Tree) int {
 			break
 		}
 	}
-	log.Printf("Tree: %+v, Right score: %d\n", tree, rightScore)
+	// log.Printf("Tree: %+v, Right score: %d\n", tree, rightScore)
 	calcScore := topScore * bottomScore * leftScore * rightScore
 
 	return calcScore
