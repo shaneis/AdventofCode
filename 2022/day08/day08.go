@@ -45,6 +45,7 @@ func main() {
 	// }
 
 	log.Printf("Part 01: %d\n", part01(input))
+	log.Printf("Part 02: %d\n", part02(input))
 }
 
 func parseFile(filename *string) []string {
@@ -188,4 +189,8 @@ func visibleFromRight(input []string, treeToCheck Tree) bool {
 		}
 	}
 	return true
+}
+
+func part02(input []string) int {
+	return 0
 }
