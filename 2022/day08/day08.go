@@ -16,6 +16,10 @@ type Tree struct {
 	score             int
 }
 
+func (t *Tree) updateScore(newScore int) {
+	t.score = newScore
+}
+
 type Trees []Tree
 
 func (t Trees) Len() int {
@@ -41,9 +45,9 @@ func main() {
 	flag.Parse()
 
 	input := parseFile(f)
-	// for index, line := range input {
-	// log.Printf("[%2d] line: %q\n", index, line)
-	// }
+	for index, line := range input {
+		log.Printf("[%2d] line: %q\n", index, line)
+	}
 
 	log.Printf("Part 01: %d\n", part01(input))
 	log.Printf("Part 02: %d\n", part02(input))
@@ -193,6 +197,92 @@ func visibleFromRight(input []string, treeToCheck Tree) bool {
 }
 
 func part02(input []string) int {
-	// allTrees := createTrees(input)
+	allTrees := createTrees(input)
+	sort.Stable(allTrees)
+
+	for i := 0; i < len(allTrees); i++ {
+		allTrees[i].isVisible = visibleFromTop(input, allTrees[i])
+		allTrees[i].isVisible = visibleFromBottom(input, allTrees[i])
+		allTrees[i].isVisible = visibleFromLeft(input, allTrees[i])
+		allTrees[i].isVisible = visibleFromRight(input, allTrees[i])
+
+		if allTrees[i].isVisible == true {
+			allTrees[i].score = getTreeScore(input, allTrees[i])
+		}
+
+		log.Printf("Tree: %+v\n\n", allTrees[i])
+	}
+
+	for _, t := range allTrees {
+		log.Printf("%+v\n", t)
+	}
 	return 0
+}
+
+func getTreeScore(input []string, tree Tree) int {
+	var topScore, bottomScore, leftScore, rightScore int = 0, 0, 0, 0
+
+	treeRow := tree.x
+	treeCol := tree.y
+	treeVal, err := strconv.Atoi(tree.val)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Top
+	for i := treeRow - 1; i >= 0; i-- {
+		topScore++
+		compare, err := strconv.Atoi(string(input[i][treeCol]))
+		if err != nil {
+			log.Fatal(err)
+		}
+		//log.Printf("Val %d taller than %d?\n", treeVal, compare)
+
+		if compare >= treeVal {
+			break
+		}
+	}
+	log.Printf("Tree: %+v, Top score: %d\n", tree, topScore)
+	// Bottom
+	for i := treeRow + 1; i <= len(input)-1; i++ {
+		bottomScore++
+		compare, err := strconv.Atoi(string(input[i][treeCol]))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if compare >= treeVal {
+			break
+		}
+	}
+	log.Printf("Tree: %+v, Bottom score: %d\n", tree, bottomScore)
+	// Left
+	for i := treeCol - 1; i >= 0; i-- {
+		leftScore++
+		compare, err := strconv.Atoi(string(input[treeRow][i]))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if compare >= treeVal {
+			break
+		}
+	}
+	log.Printf("Tree: %+v, Left score: %d\n", tree, leftScore)
+	// Right
+	for i := treeCol + 1; i <= len(input[treeRow])-1; i++ {
+		rightScore++
+		compare, err := strconv.Atoi(string(input[treeRow][i]))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if compare >= treeVal {
+			break
+		}
+	}
+	log.Printf("Tree: %+v, Right score: %d\n", tree, rightScore)
+	calcScore := topScore * bottomScore * leftScore * rightScore
+
+	return calcScore
 }
