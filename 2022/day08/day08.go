@@ -11,8 +11,9 @@ import (
 
 type Tree struct {
 	x, y              int
-	isEdge, isVisible bool
 	val               string
+	isEdge, isVisible bool
+	score             int
 }
 
 type Trees []Tree
@@ -192,5 +193,6 @@ func visibleFromRight(input []string, treeToCheck Tree) bool {
 }
 
 func part02(input []string) int {
+	// allTrees := createTrees(input)
 	return 0
 }
