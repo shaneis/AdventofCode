@@ -40,10 +40,29 @@ func getWrappingPaperArea(dimension string) int {
 			}
 		}
 	}
-	l := dimensionsInInts[0]
-	w := dimensionsInInts[1]
-	h := dimensionsInInts[2]
+
 	return ((2 * l * w) + (2 * w * h) + (2 * h * l)) + min
+}
+
+func getRibbonSize(dimensions string) int {
+	l, w, h := convertDimensions(dimensions)
+	dimensionsInInts := [3]int{l, w, h}
+
+	min := dimensionsInInts[0] * dimensionsInInts[1]
+	minPerimeter := (2 * dimensionsInInts[0]) + (2 * dimensionsInInts[1])
+	for i := 0; i < len(dimensionsInInts); i++ {
+		for j := 0; j < len(dimensionsInInts); j++ {
+			if i == j {
+				continue
+			}
+			smallestSide := dimensionsInInts[i] * dimensionsInInts[j]
+			if smallestSide < min {
+				min = smallestSide
+				minPerimeter = (2 * dimensionsInInts[i]) + (2 * dimensionsInInts[j])
+			}
+		}
+	}
+	return (l * w * h) + minPerimeter
 }
 
 func main() {
