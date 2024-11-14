@@ -83,5 +83,10 @@ func main() {
 	for _, dim := range dimensions {
 		squareFeet += getWrappingPaperArea(dim)
 	}
+	ribbon := 0
+	for _, dim := range dimensions {
+		ribbon += getRibbonSize(dim)
+	}
 	fmt.Println("Order", squareFeet, "square feet of wrapping paper.")
+	fmt.Println("Order", ribbon, "feet of ribbon")
 }
