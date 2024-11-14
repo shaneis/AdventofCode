@@ -24,6 +24,10 @@ func convertDimensions(dimension string) (int, int, int) {
 	return dimensionsInInts[0], dimensionsInInts[1], dimensionsInInts[2]
 }
 
+func getWrappingPaperArea(dimension string) int {
+	l, w, h := convertDimensions(dimension)
+	dimensionsInInts := [3]int{l, w, h}
+
 	min := dimensionsInInts[0] * dimensionsInInts[1]
 	for i := 0; i < len(dimensionsInInts); i++ {
 		for j := 0; j < len(dimensionsInInts); j++ {
