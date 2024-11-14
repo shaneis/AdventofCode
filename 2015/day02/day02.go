@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func getWrappingPaperArea(dimension string) int {
+func convertDimensions(dimension string) (int, int, int) {
 	dimensionsInStrings := strings.FieldsFunc(dimension, func(r rune) bool {
 		return r == 'x'
 	})
@@ -21,6 +21,8 @@ func getWrappingPaperArea(dimension string) int {
 		}
 		dimensionsInInts = append(dimensionsInInts, d)
 	}
+	return dimensionsInInts[0], dimensionsInInts[1], dimensionsInInts[2]
+}
 
 	min := dimensionsInInts[0] * dimensionsInInts[1]
 	for i := 0; i < len(dimensionsInInts); i++ {
