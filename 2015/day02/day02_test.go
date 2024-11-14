@@ -30,7 +30,7 @@ func TestGetRibbonSize(t *testing.T) {
 
 	for _, test := range tests {
 		got := getRibbonSize(test.input)
-		if got != test.input {
+		if got != test.output {
 			t.Errorf("Expected %d, got %d. Parameters: %s\n", test.output, got, test.input)
 		}
 	}
@@ -42,7 +42,7 @@ func TestConvertDimensions(t *testing.T) {
 		l, w, h int
 	}{
 		{"2x3x4", 2, 3, 4},
-		{"1x1x102", 1, 1, 10},
+		{"1x1x10", 1, 1, 10},
 	}
 
 	for _, test := range tests {
