@@ -26,3 +26,22 @@ func TestCountHousesDelivered(t *testing.T) {
 		}
 	}
 }
+
+func TestCountHousesDelivered2Santas(t *testing.T) {
+
+	tests := []struct {
+		input  string
+		output int
+	}{
+		{">V", 3},
+		{"^>v<", 3},
+		{"^v^v^v^v^v", 11},
+	}
+
+	for _, test := range tests {
+		got := countHousesDelivered2Santas(test.input)
+		if got != test.output {
+			t.Errorf("Expected %d, got %d. Parameters: '%s'\n", test.output, got, test.input)
+		}
+	}
+}
