@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 func parseMulString(str string) []string {
@@ -28,6 +29,58 @@ func parseMulString(str string) []string {
 		}
 	}
 	return answers
+}
+
+func parseDontDoWhatJohnnyDontDoDoes(str string) []string {
+	var muls []string
+	var isMul bool = false
+	var capture bool = true
+	for i := 0; i < len(str); i++ {
+		// start capturing again...
+		if i < len(str)-4 && str[i:i+4] == "do()" {
+			capture = true
+		}
+
+		// stop capturing...
+		if i < len(str)-6 && str[i:i+7] == "don't()" {
+			capture = false
+		}
+
+		if capture && string(str[i]) == "m" {
+			if str[i:i+4] == "mul(" {
+				isMul = true
+			}
+		}
+
+		if isMul && i < len(str)-5 {
+			j := i + 4
+			for string(str[j-1]) != ")" && j < len(str) {
+				r := rune(str[j-1])
+				if !unicode.IsNumber(r) && r != ',' && r != '(' {
+					isMul = false
+					break
+				}
+				j++
+			}
+			regMatch, err := regexp.Compile(`mul\([0-9]+,[0-9]+\)`)
+			if err != nil {
+				panic(err)
+			}
+			if r := regMatch.MatchString(str[i:j]); !r {
+				isMul = false
+				continue
+			}
+			muls = append(muls, str[i:j])
+			i = j - 1
+			isMul = false
+		}
+
+		// if not capturing, skip...
+		if !capture {
+			continue
+		}
+	}
+	return muls
 }
 
 func invokeMulString(str string) int {
@@ -56,9 +109,16 @@ func main() {
 	}
 	mulString := parseMulString(string(f))
 	var answers int = 0
+	var answers2 int = 0
 	for _, mul := range mulString {
 		answer := invokeMulString(mul)
 		answers += answer
 	}
+	mulStringPartDeux := parseDontDoWhatJohnnyDontDoDoes(string(f))
+	for _, mul := range mulStringPartDeux {
+		answer := invokeMulString(mul)
+		answers2 += answer
+	}
 	fmt.Println("Part 01:", answers)
+	fmt.Println("Part 02:", answers2)
 }
