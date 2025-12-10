@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func parsePaperRolls(input string, width int) *strings.Builder {
+func parsePaperRolls(input string, width int) (*strings.Builder, int) {
 	output := &strings.Builder{}
 	height := len(input) / width
 
@@ -35,19 +35,28 @@ func parsePaperRolls(input string, width int) *strings.Builder {
 			}
 			char := input[h*width+w]
 			if nc > 3 && char == '@' {
-				fmt.Printf("@")
+				// HAHAHAHA don't write things to the screen... WOW!... woah!
+				// Write to screen duration: 1:19.868 (1 minute 19 seconds)
+				// Not writing to screen duration: 0:00.226 (226 milliseconds)
+				// //fmt.Printf("@")
 				output.WriteByte('@')
 			} else {
 				if char == '@' {
 					char = 'X'
 				}
-				fmt.Printf("%c", char)
+				//fmt.Printf("%c", char)
 				output.WriteByte(char)
 			}
 		}
-		fmt.Println()
+		//fmt.Println()
 	}
-	return output
+	countX := 0
+	for i := 0; i < output.Len(); i++ {
+		if output.String()[i] == 'X' && input[i] == '@' {
+			countX++
+		}
+	}
+	return output, countX
 }
 
 func main() {
@@ -73,7 +82,8 @@ func main() {
 		height++
 	}
 
-	output := parsePaperRolls(input.String(), width)
+	_, countX := parsePaperRolls(input.String(), width)
+	fmt.Println(countX, "\n")
 	/*
 		fmt.Printf("Input:\n%v\n", input.String())
 		for i := 0; i < count; i++ {
@@ -85,12 +95,18 @@ func main() {
 		}
 	*/
 
-	countX := 0
-	for i := 0; i < output.Len(); i++ {
-		if output.String()[i] == 'X' {
-			countX++
-		}
-	}
 	// 11908, too high
+	countPart2 := 0
+	output, changes := parsePaperRolls(input.String(), width)
+	countPart2 += changes
+	fmt.Println(changes, "\n")
+
+	for changes > 0 {
+		output, changes = parsePaperRolls(output.String(), width)
+		countPart2 += changes
+		fmt.Println(changes, "\n")
+	}
+
 	fmt.Printf("Day 04-i: %d\n", countX)
+	fmt.Printf("Day 04-ii: %d\n", countPart2)
 }
