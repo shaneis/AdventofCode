@@ -61,6 +61,8 @@ func main() {
 	fileContents := getFileInput(*file)
 	totalLines := len(fileContents)
 
+	fmt.Printf("File contents: %+v\n", fileContents)
+
 	actions := fileContents[totalLines-1]
 
 	results := solvePart1(fileContents[:totalLines-1], strings.Fields(actions))
